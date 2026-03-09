@@ -33,7 +33,11 @@ Route::post('/products/{product}/buy', [OrderController::class, 'store'])->name(
 // Profile Routes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    // Shopping Cart Routes
+    Route::get('/cart', [\App\Http\Controllers\CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart', [\App\Http\Controllers\CartController::class, 'store'])->name('cart.store');
+    Route::patch('/cart/{cartItem}', [\App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/{cartItem}', [\App\Http\Controllers\CartController::class, 'destroy'])->name('cart.destroy');
 });
 
 Route::post('/inquiries', [\App\Http\Controllers\InquiryController::class, 'store'])->name('inquiries.store');

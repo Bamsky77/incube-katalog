@@ -27,6 +27,19 @@
             </form>
             <div class="w-px h-6 bg-slate-100 hidden lg:block"></div>
             
+            <!-- Cart Icon Sovereign -->
+            <a href="{{ route('cart.index') }}" class="relative group p-2">
+                <svg class="w-6 h-6 text-slate-400 group-hover:text-primary-purple transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                @auth
+                    @php $cartCount = auth()->user()->cartItems->sum('quantity'); @endphp
+                    @if($cartCount > 0)
+                        <span class="absolute -top-1 -right-1 bg-primary-purple text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-lg border-2 border-white animate-bounce-subtle">{{ $cartCount }}</span>
+                    @endif
+                @endauth
+            </a>
+
+            <div class="w-px h-6 bg-slate-100 hidden lg:block"></div>
+            
             @auth
                 <div class="flex items-center gap-6">
                     <div class="flex items-center gap-2">

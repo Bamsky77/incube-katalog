@@ -40,15 +40,6 @@
                     {{ $product->name }}
                 </h1>
                 <div class="flex items-center gap-4 text-sm mb-8">
-                    <div class="flex items-center gap-1 px-1.5 py-0.5 border-b border-orange-500">
-                        <span class="text-orange-500 font-bold underline">{{ number_format($product->rating, 1) }}</span>
-                        <div class="flex items-center text-orange-400">
-                            @for($i = 1; $i <= 5; $i++)
-                            <svg class="w-3 h-3 {{ $i <= floor($product->rating) ? 'fill-orange-400' : 'fill-slate-200' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                            @endfor
-                        </div>
-                    </div>
-                    <span class="w-px h-4 bg-slate-200"></span>
                     <div class="border-b border-slate-300 pb-0.5">
                         <span class="text-slate-900 font-bold underline">{{ $product->review_count }}</span>
                         <span class="text-slate-500 text-xs">Penilaian</span>
@@ -76,12 +67,17 @@
 
                 <!-- Action Hub -->
                 <div class="flex flex-col sm:flex-row gap-4 mb-20">
-                    <form action="{{ route('products.buy', $product->id) }}" method="POST" class="flex-1">
+                    <form action="{{ route('cart.store') }}" method="POST" class="flex-1">
                         @csrf
-                        <button type="submit" class="w-full btn-sovereign-purple py-4 text-sm tracking-widest uppercase">
-                             Beli Produk Ini
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="w-full bg-slate-900 text-white py-4 text-sm tracking-widest uppercase rounded-lg hover:bg-slate-800 transition-all font-bold">
+                             Tambah ke Keranjang
                         </button>
                     </form>
+                    <button onclick="openInquiryModal({{ $product->id }}, '{{ addslashes($product->name) }}')" class="flex-1 btn-sovereign-purple py-4 text-sm tracking-widest uppercase">
+                         INQUIRY SEKARANG
+                    </button>
                     <button onclick="toggleFavorite(this, {{ $product->id }})" class="w-14 h-14 border border-slate-200 rounded-lg flex items-center justify-center transition-all duration-300 group">
                         <svg class="w-6 h-6 {{ $product->isFavoritedBy(auth()->user()) ? 'fill-red-500 text-red-500' : 'text-slate-400 group-hover:text-red-500' }}" fill="{{ $product->isFavoritedBy(auth()->user()) ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                     </button>
@@ -108,32 +104,12 @@
             <!-- Review Summary -->
             <div class="p-10 bg-slate-50 border-r border-slate-100">
                 <h3 class="text-xl font-bold text-slate-900 mb-8 font-primary">Penilaian Pelanggan</h3>
-                <div class="flex items-center gap-6 mb-10">
-                    <div class="text-6xl font-black text-slate-900 leading-none">{{ number_format($product->rating, 1) }}</div>
-                    <div>
-                        <div class="flex items-center text-orange-400 mb-2">
-                             @for($i = 1; $i <= 5; $i++)
-                             <svg class="w-4 h-4 {{ $i <= floor($product->rating) ? 'fill-orange-400' : 'fill-slate-200' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                             @endfor
-                        </div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Berdasarkan {{ $product->reviews->count() }} ulasan</p>
-                    </div>
-                </div>
-
                 @auth
                 <div class="pt-10 border-t border-slate-200">
                     <h4 class="text-sm font-bold text-slate-900 mb-6 uppercase tracking-widest">Tulis Ulasan Anda</h4>
                     <form action="{{ route('products.reviews.store', $product->id) }}" method="POST" class="space-y-4">
                         @csrf
-                        <div>
-                            <select name="rating" class="w-full bg-white border-slate-200 rounded-xl text-xs font-bold px-4 py-3 focus:ring-primary-purple focus:border-primary-purple">
-                                <option value="5">Sangat Puas (5 Bintang)</option>
-                                <option value="4">Puas (4 Bintang)</option>
-                                <option value="3">Cukup (3 Bintang)</option>
-                                <option value="2">Kurang (2 Bintang)</option>
-                                <option value="1">Kecewa (1 Bintang)</option>
-                            </select>
-                        </div>
+                        <input type="hidden" name="rating" value="5">
                         <textarea name="comment" rows="4" placeholder="Bagikan pengalaman Anda menggunakan aset ini..." class="w-full bg-white border-slate-200 rounded-xl text-xs font-medium px-4 py-3 focus:ring-primary-purple focus:border-primary-purple"></textarea>
                         <button type="submit" class="w-full bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest py-4 rounded-xl hover:bg-slate-800 transition-all shadow-lg">Kirim Ulasan</button>
                     </form>
@@ -161,11 +137,6 @@
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ $review->created_at->diffForHumans() }}</p>
                                 </div>
                             </div>
-                            <div class="flex items-center text-orange-400">
-                                @for($i = 1; $i <= 5; $i++)
-                                <svg class="w-3 h-3 {{ $i <= $review->rating ? 'fill-orange-400' : 'fill-slate-100' }}" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                @endfor
-                            </div>
                         </div>
                         <p class="text-sm text-slate-600 leading-relaxed font-medium bg-slate-50/50 p-4 rounded-xl border-l-4 border-slate-100 italic">
                             "{{ $review->comment }}"
@@ -181,6 +152,69 @@
             </div>
         </div>
     </div>
+
+    <!-- Related Products Sovereign -->
+    @if($relatedProducts->count() > 0)
+    <div class="mb-24">
+        <div class="flex items-center justify-between mb-10">
+            <div>
+                <h3 class="text-2xl font-bold text-slate-900 mb-2">Produk Terkait</h3>
+                <div class="w-12 h-1.5 bg-primary-purple rounded-full"></div>
+            </div>
+            <a href="{{ route('products.index', ['category' => $product->category->slug]) }}" class="text-xs font-bold text-primary-purple uppercase tracking-widest hover:underline transition-all">
+                Lihat Semua
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            @foreach($relatedProducts as $related)
+            @php
+                $relImgPath = $related->images->where('is_primary', true)->first()->image_path ?? asset('assets/images/gaming_setup.png');
+                if (!str_starts_with($relImgPath, 'http')) {
+                    $relImgPath = asset($relImgPath);
+                }
+            @endphp
+            <div class="bg-white rounded-[16px] shadow-sm hover:shadow-md transition-all duration-200 p-4 group flex flex-col h-full overflow-hidden">
+                <!-- Image Container (Square 1:1) -->
+                <div class="relative aspect-square rounded-xl overflow-hidden mb-3 bg-[#f8fafc] flex items-center justify-center shrink-0">
+                    <img src="{{ $relImgPath }}" alt="{{ $related->name }}" class="w-full h-full object-contain group-hover:scale-[1.03] transition-transform duration-300">
+                    
+                    <!-- Hover Overlay (Action Hub) -->
+                    <div class="absolute inset-0 bg-black/[0.12] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-2 z-30 pointer-events-none group-hover:pointer-events-auto backdrop-blur-[2px]">
+                        <a href="{{ route('products.show', $related->slug) }}" class="flex-shrink-0 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 opacity-0 group-hover:opacity-100">
+                             <span class="px-3 py-1.5 bg-white text-gray-800 text-[10px] font-bold rounded-full shadow-xl hover:bg-gray-50 transition-colors inline-block uppercase whitespace-nowrap">DETAIL</span>
+                         </a>
+                         <form action="{{ route('cart.store') }}" method="POST" class="m-0 p-0 flex-shrink-0 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-[50ms] opacity-0 group-hover:opacity-100">
+                             @csrf
+                             <input type="hidden" name="product_id" value="{{ $related->id }}">
+                             <input type="hidden" name="quantity" value="1">
+                             <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-full bg-white text-primary-purple shadow-xl hover:bg-primary-purple hover:text-white transition-all">
+                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                             </button>
+                         </form>
+                         <button onclick="openInquiryModal({{ $related->id }}, '{{ addslashes($related->name) }}')" class="px-3 py-1.5 bg-primary-purple text-white text-[10px] font-bold rounded-full shadow-xl hover:opacity-90 transition-opacity uppercase tracking-wider whitespace-nowrap transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-100 opacity-0 group-hover:opacity-100">INQUIRY</button>
+                    </div>
+                </div>
+
+                <!-- Product Details -->
+                <div class="flex flex-col flex-1 px-1">
+                    <!-- Product Name -->
+                    <h3 class="text-xs font-bold text-[#1e293b] line-clamp-2 leading-snug mb-2 min-h-[2.5rem]">
+                        <a href="{{ route('products.show', $related->slug) }}" class="hover:text-primary-purple transition-colors">{{ $related->name }}</a>
+                    </h3>
+
+                    <!-- Price -->
+                    <div class="flex items-end justify-between mt-auto pt-3 border-t border-gray-100/50">
+                        <div class="text-[13px] font-bold text-primary-purple leading-tight">
+                            <span class="text-[10px] mr-1 font-black uppercase tracking-tighter">Rp</span>{{ number_format($related->price, 0, ',', '.') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
     <!-- Technical Specs Sovereign -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">

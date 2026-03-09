@@ -80,30 +80,6 @@
                 </div>
             </div>
 
-            <!-- Rating Filter -->
-            <div class="mb-10 pt-6 border-t border-slate-100">
-                <button onclick="toggleSection('rating-content', 'rating-icon')" class="w-full flex items-center justify-between text-sm font-bold text-slate-900 mb-4 focus:outline-none group text-left">
-                    Rating
-                    <svg id="rating-icon" class="w-4 h-4 text-slate-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                <div id="rating-content" class="filter-content">
-                    <div class="space-y-3 pb-2">
-                        @foreach([4, 3, 2, 1] as $r)
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="radio" name="rating" value="{{ $r }}" class="rating-filter w-4 h-4 border-slate-300 text-primary-purple focus:ring-primary-purple/20 transition-all" {{ request('rating') == $r ? 'checked' : '' }}>
-                            <div class="flex items-center gap-1.5">
-                                <div class="flex items-center">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <svg class="w-3 h-3 {{ $i <= $r ? 'text-yellow-400 fill-yellow-400' : 'text-slate-200 fill-slate-200' }} transition-colors" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                    @endfor
-                                </div>
-                                <span class="text-[10px] font-bold text-slate-500 leading-none whitespace-nowrap">{{ $r }} & Ke Atas</span>
-                            </div>
-                        </label>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
             
             <!-- Ad Space Clean -->
             <div class="bg-slate-900 p-8 rounded-xl text-white shadow-sovereign-lg relative overflow-hidden group mt-12">
@@ -135,7 +111,6 @@
                         <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Terbaru</option>
                         <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Harga Tertinggi</option>
                         <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Harga Terendah</option>
-                        <option value="rating_desc" {{ request('sort') == 'rating_desc' ? 'selected' : '' }}>Rating Tertinggi</option>
                         <option value="reviews_desc" {{ request('sort') == 'reviews_desc' ? 'selected' : '' }}>Ulasan Terbanyak</option>
                     </select>
                 </div>
@@ -181,10 +156,15 @@
                             <a href="{{ route('products.show', $product->slug) }}" class="flex-shrink-0 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 opacity-0 group-hover:opacity-100">
                                 <span class="px-3.5 py-1.5 bg-white text-gray-800 text-[10px] font-bold rounded-full shadow-xl hover:bg-gray-50 transition-colors inline-block uppercase whitespace-nowrap">DETAIL</span>
                             </a>
-                            <form action="{{ route('products.buy', $product->id) }}" method="POST" class="m-0 p-0 flex-shrink-0 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75 opacity-0 group-hover:opacity-100">
+                            <form action="{{ route('cart.store') }}" method="POST" class="m-0 p-0 flex-shrink-0 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-[50ms] opacity-0 group-hover:opacity-100">
                                 @csrf
-                                <button type="submit" class="px-3.5 py-1.5 bg-primary-purple text-white text-[10px] font-bold rounded-full shadow-xl hover:opacity-90 transition-opacity uppercase tracking-wider whitespace-nowrap">BELI</button>
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-full bg-white text-primary-purple shadow-xl hover:bg-primary-purple hover:text-white transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                </button>
                             </form>
+                            <button onclick="openInquiryModal({{ $product->id }}, '{{ addslashes($product->name) }}')" class="px-3.5 py-1.5 bg-primary-purple text-white text-[10px] font-bold rounded-full shadow-xl hover:opacity-90 transition-opacity uppercase tracking-wider whitespace-nowrap transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-100 opacity-0 group-hover:opacity-100">INQUIRY</button>
                             <button onclick="toggleFavorite(this, {{ $product->id }})" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 border border-white/40 hover:bg-white text-white hover:text-red-500 transition-all backdrop-blur-md shadow-xl flex-shrink-0 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 delay-150">
                                 <svg class="w-3.5 h-3.5 {{ $product->isFavoritedBy(auth()->user()) ? 'fill-red-500 text-red-500' : 'fill-none' }} transition-all duration-300" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"></path>
@@ -200,13 +180,6 @@
                             <a href="{{ route('products.show', $product->slug) }}" class="hover:text-primary-purple transition-colors">{{ $product->name }}</a>
                         </h3>
 
-                        <!-- Rating -->
-                        <div class="flex items-center gap-1 mb-2">
-                            <div class="flex items-center text-yellow-400">
-                                <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                <span class="text-[11px] font-bold ml-1 text-gray-700">{{ number_format($product->rating, 1) }}</span>
-                            </div>
-                        </div>
 
                         <!-- Price + Sold -->
                         <div class="flex items-end justify-between mt-auto pt-3 border-t border-gray-100/50">
@@ -295,8 +268,7 @@
         const config = [
             { id: 'category-content', icon: 'category-icon', active: urlParams.has('category') },
             { id: 'brand-content', icon: 'brand-icon', active: urlParams.has('brand') },
-            { id: 'price-content', icon: 'price-icon', active: urlParams.has('min_price') || urlParams.has('max_price') },
-            { id: 'rating-content', icon: 'rating-icon', active: urlParams.has('rating') }
+            { id: 'price-content', icon: 'price-icon', active: urlParams.has('min_price') || urlParams.has('max_price') }
         ];
 
         config.forEach(section => {
@@ -330,11 +302,6 @@
             searchParams.delete('brand');
         }
 
-        // Rating filter
-        const selectedRating = document.querySelector('.rating-filter:checked');
-        if (selectedRating) {
-            searchParams.set('rating', selectedRating.value);
-        }
 
         // Keep search, category, sort if they exist
         window.location.href = url.href;
@@ -361,8 +328,7 @@
         window.location.href = url.href;
     });
 
-    // Brand and Rating auto-update
-    document.querySelectorAll('.brand-filter, .rating-filter').forEach(el => {
+    document.querySelectorAll('.brand-filter').forEach(el => {
         el.addEventListener('change', updateFilters);
     });
 
@@ -416,4 +382,5 @@
         @endauth
     }
 </script>
+@include('partials.inquiry_modal')
 @endsection

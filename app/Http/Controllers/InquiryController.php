@@ -15,14 +15,18 @@ class InquiryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'subject' => 'required|string|max:255',
+            'subject' => 'nullable|string|max:255',
             'message' => 'required|string',
             'phone' => 'nullable|string|max:20',
             'company_name' => 'nullable|string|max:255',
-            'product_id' => 'nullable|exists:products,id',
+            'product_id' => 'required|exists:products,id',
             'quantity' => 'nullable|integer',
             'project_description' => 'nullable|string',
         ]);
+
+        if (empty($validated['subject'])) {
+            $validated['subject'] = 'Product Inquiry';
+        }
 
         \App\Models\Inquiry::create($validated);
 
